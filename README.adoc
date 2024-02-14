@@ -1,0 +1,43 @@
+= Example for Monitoring Confluent Platform with Prometheus and Grafana based on Docker
+
+DISCLAIMER: This project is for demonstration purposes only. Using the concept in production is highly discouraged. Use at your own risk.
+
+== Preconditions
+
+This project has been tested with Java version 17 and Gradle version TODO
+
+== Running Confluent Platform
+Change to folder `cluster`.
+
+Start the containers by running:
+```
+docker-compose up -d
+```
+
+Stopping the containers:
+```
+docker-compose down
+```
+
+Cleaning up (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
+```
+docker volumes prune
+```
+
+== Building the Producers
+Initialize by running
+```
+gradle wrapper
+```
+
+Build Jar including all libraries with:
+```
+./gradlew shadowJar
+```
+
+== Running the transactional producer
+
+```
+cd clients/producer-transactional
+gradle run
+```
