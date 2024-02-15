@@ -36,8 +36,21 @@ Build Jar including all libraries with:
 ```
 
 == Running the transactional producer
+Change to the "clients" folder. Then use the following commands to run the code:
 
 ```
-cd clients/producer-transactional
-gradle run
+./gradlew -p producer-transactional run
+```
+
+== Some helpful commands
+Consume from the topic like this:
+
+```shell
+kafka-console-consumer --bootstrap-server localhost:9092 --topic topic-1 --from-beginning
+```
+
+You can delete the auto-created topic like this:
+
+```shell
+kafka-topics --bootstrap-server localhost:9092 --delete --topic topic-1
 ```

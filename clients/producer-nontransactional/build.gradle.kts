@@ -12,9 +12,9 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass.set("io.confluent.csta.examples.transactions.producer.transactional.TransactionalProducer")
+    mainClass.set("io.confluent.csta.examples.transactions.producer.nontransactional.NontransactionalProducer")
 }
 
 tasks.run<JavaExec> {
-    args(listOf("../producer-transactional.properties"))
+    args(listOf("../producer-nontransactional.properties"))
 }
