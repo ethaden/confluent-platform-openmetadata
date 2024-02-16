@@ -3,12 +3,12 @@
  */
 package io.confluent.csta.examples.transactions.producer.transactional;
 
-import java.util.Properties;
 import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
-
 
 
 public class TransactionalProducer {
@@ -31,41 +31,46 @@ public class TransactionalProducer {
         }
         try {
             final Properties config = loadConfig(args[0]);
-/*             config.put("client.id", "TransactionalProducer");
-            // Make sure /etc/hosts contains aliases for localhost named kafka1, kafka2, kafka3
-            config.put("bootstrap.servers", "kafka1:9091,kafka2:9092,kafka3:9093");
-            */
             config.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-            config.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             config.put("value.serializer",
                     "org.apache.kafka.common.serialization.StringSerializer");
-            config.put("value.deserializer",
-                    "org.apache.kafka.common.serialization.StringDeserializer");
             config.put("acks", "all");
             config.put("enable.idempotence", "true");
-            /*            config.put("transactional.id", "prod-1"); */
             String topic = config.getProperty("topic");
             config.remove("topic");
-            Producer<String, String> producer = new KafkaProducer<>(config);
-            producer.initTransactions();
-            for (int i = 0; i < 10; i++) {
-                producer.beginTransaction();
-                producer.send(new ProducerRecord<String, String>(topic, null,
-                        "a" + Integer.toString(i)));
-                producer.send(new ProducerRecord<String, String>(topic, null,
-                        "b" + Integer.toString(i)));
-                producer.send(new ProducerRecord<String, String>(topic, null,
-                        "c" + Integer.toString(i)));
-                producer.send(new ProducerRecord<String, String>(topic, null,
-                        "d" + Integer.toString(i)));
-                if (i%2==1) {
-                    // Oh no! Something went wrong and we need to abort this transaction
-                    producer.abortTransaction();
-                } else {
-                    producer.commitTransaction();
+            try (Producer<String, String> producer = new KafkaProducer<>(config)) {
+                producer.initTransactions();
+                for (int i = 0; i < 10; i++) {
+                    producer.beginTransaction();
+                    /*
+                     * List <Header> headers = new ArrayList<>(); headers.add(new
+                     * RecordHeader("traceId", Long.toString(System.currentTimeMillis() /
+                     * 1000L).getBytes()));
+                     */
+                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
+                            "a" + Integer.toString(i),
+                            Arrays.<Header>asList(new RecordHeader("traceId", Long
+                                    .toString(System.currentTimeMillis() / 1000L).getBytes()))));
+                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
+                            "b" + Integer.toString(i),
+                            Arrays.<Header>asList(new RecordHeader("traceId", Long
+                                    .toString(System.currentTimeMillis() / 1000L).getBytes()))));
+                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
+                            "c" + Integer.toString(i),
+                            Arrays.<Header>asList(new RecordHeader("traceId", Long
+                                    .toString(System.currentTimeMillis() / 1000L).getBytes()))));
+                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
+                            "d" + Integer.toString(i),
+                            Arrays.<Header>asList(new RecordHeader("traceId", Long
+                                    .toString(System.currentTimeMillis() / 1000L).getBytes()))));
+                    if (i % 2 == 1) {
+                        // Oh no! Something went wrong and we need to abort this transaction
+                        producer.abortTransaction();
+                    } else {
+                        producer.commitTransaction();
+                    }
                 }
             }
-            producer.close();
         } catch (IOException e) {
             System.err.println("An exception occurred while load properties file: " + e);
             System.exit(1);

@@ -13,3 +13,4 @@ plugins {
 rootProject.name = "kafka-transactions"
 include("producer-transactional")
 include("producer-nontransactional")
+include("consumer-transactional")

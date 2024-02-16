@@ -36,11 +36,8 @@ public class NontransactionalProducer {
             config.put("bootstrap.servers", "kafka1:9091,kafka2:9092,kafka3:9093");
             */
             config.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-            config.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             config.put("value.serializer",
                     "org.apache.kafka.common.serialization.StringSerializer");
-            config.put("value.deserializer",
-                    "org.apache.kafka.common.serialization.StringDeserializer");
             config.put("acks", "all");
             config.put("enable.idempotence", "true");
             /*            config.put("transactional.id", "prod-1"); */
