@@ -47,6 +47,32 @@ Change to the "clients" folder. Then use the following commands to run the code:
 ./gradlew -p producer-transactional run
 ```
 
+== Running an implementation consisting of a transactional producer interlieved with a non-transactional producer
+Change to the "clients" folder. Then use the following commands to run the code:
+
+```
+./gradlew -p consumer-transactionalchaos run
+```
+
+However, the expected chaos does not happen. Still, mixing transactional and non-transacational messages in one topic is highly discouraged.
+
+== Running the transactional consumer
+Change to the "clients" folder. Then use the following commands to run the code:
+
+```
+./gradlew -p consumer-transactional run
+```
+
+== Running the transactional Kafka streams application
+Change to the "clients" folder. Then use the following commands to run the code:
+
+```
+./gradlew -p kstreams-header-forward run
+```
+
+This will forward all commited transactional messages and non-transactional messages from `topic-1` to `topic-2`.
+There are three different, very simple topologies in the implementation which have in common that they will retain the original context including the headers send with the transactional messages (in this example, this would work for non-transactional messages, too, but here we do not add headers to those).
+
 == Some helpful commands
 Consume from the topic like this, including the headers of the messages:
 
@@ -72,3 +98,8 @@ You can delete the auto-created topic like this:
 ```shell
 kafka-topics --bootstrap-server localhost:9092 --delete --topic topic-1
 ```
+
+== Results
+
+If mixing transactional and non-transactional messages in a single topic, consumers will still see all messages by default. With `isolation.level=read_committed` they will just see all commited messages from the transactions and additionally all non-transactional messages. The messages are filtered on the consumer side, but this happens inside of the Kafka client library and is not exposed to the customer application. Particularly, it is not possible on the application level to distinguish between commited transactional messages and non-transactional messages.
+
