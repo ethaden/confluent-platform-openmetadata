@@ -13,4 +13,6 @@ plugins {
 rootProject.name = "kafka-transactions"
 include("producer-transactional")
 include("producer-nontransactional")
+include("producer-transactionalchaos")
 include("consumer-transactional")
+include("kstreams-header-forward")
