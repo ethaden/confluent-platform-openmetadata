@@ -26,6 +26,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

@@ -4,17 +4,32 @@
 
 plugins {
     id("io.confluent.csta.examples.transactions.java-application-conventions")
+    id("com.ryandens.javaagent-application") version "0.4.2"
+    //id("com.ryandens.javaagent-otel-modification") version "0.4.2"
 }
 
 dependencies {
-    //implementation("org.apache.kafka:kafka-clients:3.6.1")
+    javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+    runtimeOnly("io.opentelemetry:opentelemetry-exporter-jaeger:1.34.1")
+    // otel("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+    // otelExtension("io.opentelemetry.contrib:opentelemetry-samplers:1.32.0-alpha")
+    // otelInstrumentation(project(":custom-instrumentation", "shadow"))
 }
 
 application {
     // Define the main class for the application.
     mainClass.set("io.confluent.csta.examples.transactions.producer.transactional.TransactionalProducer")
+    applicationDefaultJvmArgs = listOf("-Dotel.javaagent.debug=true", "-Dotel.metrics.exporter=none", "-Dotel.traces.exporter=jaeger", "-Dotel.service.name=kafka")
+    //println(configurations.runtime.resolve())
+    println(mainClass)
 }
 
 tasks.run<JavaExec> {
     args(listOf("../producer-transactional.properties"))
 }
+
+// setOf(tasks.distTar, tasks.distZip, tasks.startScripts).forEach {
+//   it.configure {
+//     dependsOn(tasks.extendedAgent)
+//   }
+// }

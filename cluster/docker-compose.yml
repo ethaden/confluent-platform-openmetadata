@@ -42,6 +42,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
+  # Please access the Control Center UI via http://localhost:9021
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.6.0
     hostname: control-center
@@ -61,3 +62,58 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+
+  # cassandra:
+  #   hostname: cassandra
+  #   image: cassandra
+  #   environment:
+  #     MAX_HEAP_SIZE: 1G
+  #     HEAP_NEWSIZE: 256M
+  #   ports:
+  #    - "9042:9042"
+
+  # cassandra-schema:
+  #   image: jaegertracing/jaeger-cassandra-schema
+  #   depends_on:
+  #     - cassandra
+
+  # # Please access the Jaeger UI via http://localhost:16686
+  # jaeger:
+  #   image: jaegertracing/all-in-one:1.12
+  #   hostname: jaeger
+  #   container_name: jaeger
+  #   depends_on:
+  #     - cassandra
+  #     - cassandra-schema
+  #     - broker
+  #   ports:
+  #     - "5775:5775/udp"
+  #     - "6831:6831/udp"
+  #     - "6832:6832/udp"
+  #     - "5778:5778"
+  #     - "16686:16686"
+  #     - "14268:14268"
+  #     - "14250:14250"
+  #     - "9411:9411"
+  #   environment:
+  #     SPAN_STORAGE_TYPE: cassandra
+
+  # Please access the Jaeger UI via http://localhost:16686
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    hostname: jaeger
+    container_name: jaeger
+    restart: always
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=nextcloud
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778 
+      - 16686:16686
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
