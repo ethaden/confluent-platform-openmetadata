@@ -28,6 +28,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+//    agent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+    //exporter("io.opentelemetry:opentelemetry-exporter-jaeger:1.32.0")
+
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

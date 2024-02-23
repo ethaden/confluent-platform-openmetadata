@@ -4,25 +4,71 @@
 
 plugins {
     id("io.confluent.csta.examples.transactions.java-application-conventions")
-    id("com.ryandens.javaagent-application") version "0.4.2"
+    //id("com.ryandens.javaagent-application") version "0.4.2"
     //id("com.ryandens.javaagent-otel-modification") version "0.4.2"
+    //id("io.spring.dependency-management") version "1.1.4"
 }
 
+val agent = configurations.create("agent")
+val exporter = configurations.create("exporter")
+
+// dependencyManagement {
+//   imports {
+//     mavenBom("io.opentelemetry:opentelemetry-bom:1.35.0")
+//   }
+// }
+
 dependencies {
-    javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
-    runtimeOnly("io.opentelemetry:opentelemetry-exporter-jaeger:1.34.1")
+    //javaagent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+    //runtimeOnly("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+    //runtimeOnly("io.opentelemetry:opentelemetry-exporter-jaeger:1.34.1")
+    //runtimeOnly("io.opentelemetry:opentelemetry-exporter-jaeger:1.34.1")
+    
     // otel("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
     // otelExtension("io.opentelemetry.contrib:opentelemetry-samplers:1.32.0-alpha")
     // otelInstrumentation(project(":custom-instrumentation", "shadow"))
+    implementation(platform("io.opentelemetry:opentelemetry-bom:1.35.0"));
+    implementation(platform("io.opentelemetry:opentelemetry-bom-alpha:1.35.0-alpha"));
+    //implementation("io.opentelemetry:opentelemetry-api")
+    //implementation("io.opentelemetry:opentelemetry-exporters-jaeger")
+    implementation("io.opentelemetry:opentelemetry-exporters-jaeger:0.9.1")
+    //implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+    agent("io.opentelemetry.javaagent:opentelemetry-javaagent:2.1.0")
+    exporter("io.opentelemetry:opentelemetry-exporters-jaeger")
+    //implementation("io.opentelemetry:opentelemetry-exporter-jaeger")
 }
 
 application {
     // Define the main class for the application.
     mainClass.set("io.confluent.csta.examples.transactions.producer.transactional.TransactionalProducer")
-    applicationDefaultJvmArgs = listOf("-Dotel.javaagent.debug=true", "-Dotel.metrics.exporter=none", "-Dotel.traces.exporter=jaeger", "-Dotel.service.name=kafka")
+    sourceSets.main.get().runtimeClasspath += files("./build/agent/opentelemetry-exporter-jaeger.jar")
+    applicationDefaultJvmArgs = listOf(
+        "-javaagent:build/agent/opentelemetry-javaagent.jar",
+        "-Dotel.javaagent.debug=true", 
+        "-Dotel.metrics.exporter=none", 
+        "-Dotel.traces.exporter=jaeger", 
+        "-Dotel.service.name=kafka")
     //println(configurations.runtime.resolve())
-    println(mainClass)
+    println(sourceSets.main.get().runtimeClasspath)
 }
+
+val copyJaegerExporter = tasks.register<Copy>("copyJaegerExporter") {
+    from(agent.singleFile)
+    into(layout.buildDirectory.dir("exporter"))
+    rename("opentelemetry-exporter-jaeger-.*\\.jar", "opentelemetry-exporter-jaeger.jar")
+}
+
+val copyAgent = tasks.register<Copy>("copyAgent") {
+    from(agent.singleFile)
+    into(layout.buildDirectory.dir("agent"))
+    rename("opentelemetry-javaagent-.*\\.jar", "opentelemetry-javaagent.jar")
+}
+
+tasks.named("copyAgent") {
+  dependsOn("copyJaegerExporter")
+}
+
+tasks.named("build") { finalizedBy("copyAgent") }
 
 tasks.run<JavaExec> {
     args(listOf("../producer-transactional.properties"))
