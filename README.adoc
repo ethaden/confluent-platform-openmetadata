@@ -47,6 +47,12 @@ Change to the "clients" folder. Then use the following commands to run the code:
 ./gradlew -p producer-transactional run
 ```
 
+Alternatively, run the combined jar like this:
+
+```shell
+java -jar producer-transactional/build/libs/producer-transactional-all.jar producer-transactional.properties
+```
+
 == Running an implementation consisting of a transactional producer interlieved with a non-transactional producer
 Change to the "clients" folder. Then use the following commands to run the code:
 

@@ -8,6 +8,7 @@
 plugins {
     // Apply the foojay-resolver plugin to allow automatic download of JDKs
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1" apply false
 }
 
 rootProject.name = "kafka-transactions"
