@@ -1,9 +1,8 @@
-= Example for Kafka Transactions and how Kafka Streams handles headers
+= Example for OpenMetaData with Confluent Platform
 
-This example code shows what happens if a transactional producer and another non-transactional producer write to the same topic.
-A consumer with `isolation.level=read_committed` will just show all commited messages from the transactions and additionally all non-transactional messages.
+This is an example how OpenMetaData can be integrated with Confluent Platform.
 
-This example also shows how Kafka Streams will handle this situation (exactly the same) and how how kStreams handles message headers. These are by default forwarded in the most simple case.
+This example code consists of a transactional producer, a simple Kafka Streams application which just forwards data to another topic, and a transactional consumer.
 
 DISCLAIMER: This project is for demonstration purposes only. Using the concept in production is highly discouraged. Use at your own risk.
 
@@ -11,7 +10,7 @@ DISCLAIMER: This project is for demonstration purposes only. Using the concept i
 
 This project has been tested with Java version 17 and Gradle version TODO
 
-== Running Confluent Platform
+== Running OpenMetaData and Confluent Platform
 Change to folder `cluster`.
 
 Start the containers by running:
@@ -28,6 +27,30 @@ Cleaning up (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
 ```
 docker volumes prune
 ```
+
+== Create topics with one partition
+
+```shell
+docker exec broker kafka-topics --bootstrap-server localhost:9092 --create --topic topic-1 --partitions 1
+docker exec broker kafka-topics --bootstrap-server localhost:9092 --create --topic topic-2 --partitions 1
+```
+
+
+== Accessing the Web UIs
+
+The OpenMetaData Web UI is located here: http://localhost:8585.
+Username: admin
+Password: admin
+
+The Confluent Control Center is located here: http://localhost:9021.
+
+== Configuring OpenMetaData
+
+Log into OpenMetaData as `admin` user. In the settings, add a messaging service of type `kafka`:
+Use these values:
+
+Bootstrap server: localhost:9092
+Schema Registry URL: localhost:8081
 
 == Building the Producers
 Initialize by running
@@ -52,15 +75,6 @@ Alternatively, run the combined jar like this:
 ```shell
 java -jar producer-transactional/build/libs/producer-transactional-all.jar producer-transactional.properties
 ```
-
-== Running an implementation consisting of a transactional producer interlieved with a non-transactional producer
-Change to the "clients" folder. Then use the following commands to run the code:
-
-```
-./gradlew -p consumer-transactionalchaos run
-```
-
-However, the expected chaos does not happen. Still, mixing transactional and non-transacational messages in one topic is highly discouraged.
 
 == Running the transactional consumer
 Change to the "clients" folder. Then use the following commands to run the code:
