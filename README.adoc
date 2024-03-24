@@ -35,12 +35,63 @@ docker exec broker kafka-topics --bootstrap-server localhost:9092 --create --top
 docker exec broker kafka-topics --bootstrap-server localhost:9092 --create --topic topic-2 --partitions 1
 ```
 
+== Initialize schema registry
+
+First, set the compatilibity level of our subject to "FORWARD_TRANSITIVE":
+
+```bash
+docker exec broker curl -X PUT -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"compatibility": "FORWARD_TRANSITIVE"}' \
+http://schema-registry:8081/config/topic-1-value
+docker exec broker curl -X PUT -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"compatibility": "FORWARD_TRANSITIVE"}' \
+http://schema-registry:8081/config/topic-2-value
+```
+
+
+Register the schema:
+
+```bash
+docker exec broker curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"schema": "{\"namespace\": \"models.avro\", \"type\": \"record\", \"name\": \"SimpleValue\", \"fields\": [ {\"name\": \"theName\", \"type\": \"string\"}, {\"name\": \"theValue\", \"type\": \"string\"}]}"}' \
+http://schema-registry:8081/subjects/topic-1-value/versions
+docker exec broker curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"schema": "{\"namespace\": \"models.avro\", \"type\": \"record\", \"name\": \"SimpleValue\", \"fields\": [ {\"name\": \"theName\", \"type\": \"string\"}, {\"name\": \"theValue\", \"type\": \"string\"}]}"}' \
+http://schema-registry:8081/subjects/topic-2-value/versions
+```
+
+Try to register an updated version of the schema, which is NOT forward compatible (should fail!):
+
+```bash
+docker exec broker curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"schema": "{\"namespace\": \"models.avro\", \"type\": \"record\", \"name\": \"SimpleValue\", \"fields\": [ {\"name\": \"theName\", \"type\": \"string\"}]}"}]}"}' \
+http://schema-registry:8081/subjects/topic-1-value/versions
+```
+
+
+Register an updated version of the schema, which is forward compatible (thus should in theory allow an older consumer to read it). We just add a another value:
+
+```bash
+docker exec broker curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"schema": "{\"namespace\": \"models.avro\", \"type\": \"record\", \"name\": \"SimpleValue\", \"fields\": [ {\"name\": \"theName\", \"type\": \"string\"}, {\"name\": \"theValue\", \"type\": \"string\"}, {\"name\": \"theNewName\", \"type\": \"string\"}]}"}' \
+http://schema-registry:8081/subjects/topic-1-value/versions
+docker exec broker curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+--data '{"schema": "{\"namespace\": \"models.avro\", \"type\": \"record\", \"name\": \"SimpleValue\", \"fields\": [ {\"name\": \"theName\", \"type\": \"string\"}, {\"name\": \"theValue\", \"type\": \"string\"}, {\"name\": \"theNewName\", \"type\": \"string\"}]}"}' \
+http://schema-registry:8081/subjects/topic-2-value/versions
+```
+
 
 == Accessing the Web UIs
 
 The OpenMetaData Web UI is located here: http://localhost:8585.
-Username: admin
-Password: admin
+
+* Username: admin
+* Password: admin
+
+The Airflow Web UI is located here: http://localhost:8080.
+
+* Username: admin
+* Password: admin
 
 The Confluent Control Center is located here: http://localhost:9021.
 
@@ -49,8 +100,8 @@ The Confluent Control Center is located here: http://localhost:9021.
 Log into OpenMetaData as `admin` user. In the settings, add a messaging service of type `kafka`:
 Use these values:
 
-Bootstrap server: localhost:9092
-Schema Registry URL: localhost:8081
+Bootstrap server: broker:9092
+Schema Registry URL: http://schema-registry:8081
 
 == Building the Producers
 Initialize by running

@@ -10,6 +10,7 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven("https://packages.confluent.io/maven")
 }
 
 dependencies {
@@ -18,6 +19,7 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.22.1")
     implementation("org.apache.kafka:kafka-clients:3.6.1")
     implementation("org.apache.kafka:kafka-streams:3.6.1")
+    implementation("io.confluent:kafka-streams-avro-serde:7.1.1")
     constraints {
         // Define dependency versions as constraints
     }

@@ -9,6 +9,9 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
+import models.avro.SimpleValue;
 
 
 public class TransactionalProducer {
@@ -24,6 +27,15 @@ public class TransactionalProducer {
         return cfg;
     }
 
+    private static SimpleValue generateSimpleValue(int counter) {
+        SimpleValue value = SimpleValue.newBuilder()
+        .setTheName("This is message " + Integer.toString(counter))
+        .setTheValue("Some value")
+        .setTheNewName("And another, new name")
+        .build();
+        return value;
+    }
+
     public static void main(String[] args) {
         if (args.length != 1) {
             System.err.println("Usage: java <jar file> <property file>");
@@ -31,14 +43,16 @@ public class TransactionalProducer {
         }
         try {
             final Properties config = loadConfig(args[0]);
-            config.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+            config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
             config.put("value.serializer",
                     "org.apache.kafka.common.serialization.StringSerializer");
+            config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+            config.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
             config.put("acks", "all");
             config.put("enable.idempotence", "true");
             String topic = config.getProperty("topic");
             config.remove("topic");
-            try (Producer<String, String> producer = new KafkaProducer<>(config)) {
+            try (Producer<String, SimpleValue> producer = new KafkaProducer<>(config)) {
                 producer.initTransactions();
                 for (int i = 0; i < 10; i++) {
                     producer.beginTransaction();
@@ -47,20 +61,20 @@ public class TransactionalProducer {
                      * RecordHeader("traceId", Long.toString(System.currentTimeMillis() /
                      * 1000L).getBytes()));
                      */
-                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
-                            "a" + Integer.toString(i),
+                    producer.send(new ProducerRecord<String, SimpleValue>(topic, null, null,
+                            "a", generateSimpleValue(i),
                             Arrays.<Header>asList(new RecordHeader("traceId", Long
                                     .toString(System.currentTimeMillis() / 1000L).getBytes()))));
-                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
-                            "b" + Integer.toString(i),
+                    producer.send(new ProducerRecord<String, SimpleValue>(topic, null, null,
+                            "b", generateSimpleValue(i),
                             Arrays.<Header>asList(new RecordHeader("traceId", Long
                                     .toString(System.currentTimeMillis() / 1000L).getBytes()))));
-                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
-                            "c" + Integer.toString(i),
+                    producer.send(new ProducerRecord<String, SimpleValue>(topic, null, null,
+                            "c", generateSimpleValue(i),
                             Arrays.<Header>asList(new RecordHeader("traceId", Long
                                     .toString(System.currentTimeMillis() / 1000L).getBytes()))));
-                    producer.send(new ProducerRecord<String, String>(topic, null, null, null,
-                            "d" + Integer.toString(i),
+                    producer.send(new ProducerRecord<String, SimpleValue>(topic, null, null,
+                            "d", generateSimpleValue(i),
                             Arrays.<Header>asList(new RecordHeader("traceId", Long
                                     .toString(System.currentTimeMillis() / 1000L).getBytes()))));
                     if (i % 2 == 1) {

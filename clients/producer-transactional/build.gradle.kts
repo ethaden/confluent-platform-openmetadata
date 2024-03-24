@@ -6,6 +6,14 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     id("io.confluent.csta.examples.transactions.java-application-conventions")
     id("com.github.johnrengelman.shadow")
+    id("com.github.davidmc24.gradle.plugin.avro") version "1.3.0"
+}
+
+
+val avroVersion = "1.11.0"
+
+dependencies {
+    compileOnly("org.apache.avro:avro-tools:$avroVersion")
 }
 
 val agent = configurations.create("agent")
@@ -28,12 +36,12 @@ tasks.named("build") {
 application {
     // Define the main class for the application.
     mainClass.set("io.confluent.csta.examples.transactions.producer.transactional.TransactionalProducer")
-    applicationDefaultJvmArgs = listOf(
+/*     applicationDefaultJvmArgs = listOf(
         "-javaagent:build/agent/opentelemetry-javaagent.jar",
         "-Dotel.javaagent.debug=false", 
         "-Dotel.metrics.exporter=none", 
         "-Dotel.traces.exporter=otlp", 
-        "-Dotel.service.name=kafka")
+        "-Dotel.service.name=kafka") */
     println(sourceSets.main.get().runtimeClasspath)
 }
 
@@ -45,4 +53,8 @@ tasks.withType<ShadowJar>() {
     manifest {
         attributes["Main-Class"] = "io.confluent.csta.examples.transactions.producer.transactional.TransactionalProducer"
     }
+}
+
+avro {
+    setCreateSetters(false)
 }
