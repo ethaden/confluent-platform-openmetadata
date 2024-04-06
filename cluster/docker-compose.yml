@@ -415,7 +415,7 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://broker:9092'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -469,6 +469,26 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+
+  init_custom_ingestion:
+    image: confluentinc/cp-kafka:${CP_TAG}
+    hostname: init_custom_ingestion
+    container_name: init_custom_ingestion
+    depends_on:
+      openmetadata-server:
+        condition: service_started
+      execute-migrate-all:
+        condition: service_completed_successfully
+    networks:
+      - app_net
+    deploy: 
+      restart_policy: 
+        condition: none
+    volumes:
+     - ./init_custom_ingestion.sh:/usr/bin/init_custom_ingestion.sh
+    entrypoint: /bin/bash
+    command:
+      - "/usr/bin/init_custom_ingestion.sh"
 
 networks:
   app_net:

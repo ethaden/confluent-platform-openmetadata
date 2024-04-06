@@ -28,14 +28,19 @@ Cleaning up (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
 docker volumes prune
 ```
 
-== Create topics with one partition
+== Automatic setup
+Everything should have been initialized already, including topic creation ("topic-1" and "topic-2").
+
+== Manual setup
+
+=== Create topics with one partition
 
 ```shell
 docker exec broker kafka-topics --bootstrap-server localhost:9092 --create --topic topic-1 --partitions 1
 docker exec broker kafka-topics --bootstrap-server localhost:9092 --create --topic topic-2 --partitions 1
 ```
 
-== Initialize schema registry
+==== Initialize schema registry
 
 First, set the compatilibity level of our subject to "FORWARD_TRANSITIVE":
 
@@ -95,13 +100,17 @@ The Airflow Web UI is located here: http://localhost:8080.
 
 The Confluent Control Center is located here: http://localhost:9021.
 
-== Configuring OpenMetaData
+== Configuring OpenMetaData manually
 
 Log into OpenMetaData as `admin` user. In the settings, add a messaging service of type `kafka`:
 Use these values:
 
 Bootstrap server: broker:9092
 Schema Registry URL: http://schema-registry:8081
+
+Create an ingestion for the service. For this example, enable "Generate Sample Data" and run this ingestion pipeline every 5 minutes.
+
+You should see the two topics.
 
 == Building the Producers
 Initialize by running
