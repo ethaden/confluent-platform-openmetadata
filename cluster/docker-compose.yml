@@ -14,7 +14,9 @@ volumes:
   ingestion-volume-dag-airflow:
   ingestion-volume-dags:
   ingestion-volume-tmp:
+  postgresql-data:
   es-data:
+  kafka-data:
 services:
   postgresql:
     container_name: openmetadata_postgresql
@@ -29,7 +31,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-     - ./docker-volume/db-data-postgres:/var/lib/postgresql/data
+    #- ./docker-volume/db-data-postgres:/var/lib/postgresql/data
+      - postgresql-data:/var/lib/postgresql/data
     
     networks:
       - app_net
@@ -410,6 +413,8 @@ services:
     ports:
       - "9092:9092"
       - "9101:9101"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     networks:
       - app_net
     environment:
