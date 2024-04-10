@@ -100,6 +100,4 @@ if [ -n ${SERVICE_ID} ]; then
         curl --request POST --header "Content-Type: application/json" -H "Authorization: Bearer ${JWT_TOKEN}" http://openmetadata_server:8585/api/v1/services/ingestionPipelines/deploy/${INGESTION_ID}
 fi
 
-
-
 echo "Done."

@@ -13,18 +13,28 @@ This project has been tested with Java version 17 and Gradle version TODO
 == Running OpenMetaData and Confluent Platform
 Change to folder `cluster`.
 
-Start the containers by running:
+Build the custom Kafka Connect Docker Image:
+```shell
+docker build . -t cp-server-connect-custom:1.0.0
 ```
+
+Start the containers by running:
+```shell
 docker-compose up -d
 ```
 
-Stopping the containers:
-```
+Stopping the containers (but leave volumes intact):
+```shell
 docker-compose down
 ```
 
-Cleaning up (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
+Stopping the containers (and delete all volumes, CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
+```shell
+docker-compose down -v
 ```
+
+Cleaning up, if you haven't done already (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
+```shell
 docker volumes prune
 ```
 

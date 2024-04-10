@@ -433,6 +433,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_TOPIC_AUTO_CREATE: true
       # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid" 
       # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
@@ -484,6 +485,8 @@ services:
         condition: service_started
       execute-migrate-all:
         condition: service_completed_successfully
+      mariadb:
+        condition: service_started
     networks:
       - app_net
     deploy: 
@@ -494,6 +497,101 @@ services:
     entrypoint: /bin/bash
     command:
       - "/usr/bin/init_custom_ingestion.sh"
+
+  connect:
+    image: cp-server-connect-custom
+    build:
+      context: .
+      args:
+        CP_TAG: ${CP_TAG}
+    ports:
+      - 28082:28082
+    networks:
+      - app_net
+    depends_on:
+      - broker
+    environment:
+      CONNECT_REST_PORT: 28082
+      CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
+      CONNECT_GROUP_ID: default
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_TOPIC: _connect-connect-config
+      CONNECT_OFFSET_STORAGE_TOPIC: _connect-connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: _connect-connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_PLUGIN_PATH: /usr/share/confluent-hub-components
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+
+  mariadb:
+    image: mariadb
+    hostname: mariadb
+    container_name: mariadb
+    restart: always
+    networks:
+      - app_net
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD} # username: root, password see .env file
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    networks:
+      - app_net
+    environment:
+      ADMINER_DEFAULT_SERVER: mariadb
+
+  init_mariadb:
+    image: mariadb:latest
+    hostname: init_mariadb
+    container_name: init_mariadb
+    depends_on:
+      mariadb:
+        condition: service_started
+    networks:
+      - app_net
+    deploy: 
+      restart_policy: 
+        condition: none
+    volumes:
+     - ./init_mariadb.sh:/usr/bin/init_mariadb.sh
+    entrypoint: /bin/bash
+    command:
+      - "/usr/bin/init_mariadb.sh"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_CONNECT_USER: ${MARIADB_CONNECT_USER}
+      MARIADB_CONNECT_PASSWORD: ${MARIADB_CONNECT_PASSWORD}
+
+  init_connect:
+    image: confluentinc/cp-kafka:${CP_TAG}
+    hostname: init_connect
+    container_name: init_connect
+    depends_on:
+      connect:
+        condition: service_started
+    networks:
+      - app_net
+    deploy: 
+      restart_policy: 
+        condition: none
+    volumes:
+     - ./init_connect.sh:/usr/bin/init_connect.sh
+    entrypoint: /bin/bash
+    command:
+      - "/usr/bin/init_connect.sh"
+    environment:
+      MARIADB_CONNECT_USER: ${MARIADB_CONNECT_USER}
+      MARIADB_CONNECT_PASSWORD: ${MARIADB_CONNECT_PASSWORD}
+
 
 networks:
   app_net:
