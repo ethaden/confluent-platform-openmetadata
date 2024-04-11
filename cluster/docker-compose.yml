@@ -493,7 +493,9 @@ services:
       restart_policy: 
         condition: none
     volumes:
-     - ./init_custom_ingestion.sh:/usr/bin/init_custom_ingestion.sh
+      - ./init_custom_ingestion.sh:/usr/bin/init_custom_ingestion.sh
+      - ingestion-volume-dags:/opt/airflow/dags
+
     entrypoint: /bin/bash
     command:
       - "/usr/bin/init_custom_ingestion.sh"

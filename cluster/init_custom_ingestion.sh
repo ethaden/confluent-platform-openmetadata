@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# This JWT Token is signed by the fixed key pair provided with the OpenMetaData demo and thus can be used even if not configured in the web UI.
-# If this stops working, i.e. if the key pair has been changed, grab an updated key from the "openmetadata_ingestion" container:
-# docker compose exec ingestion bash -c 'grep jwtToken /opt/airflow/dags/*'
-# Use any of the jwtTokens
-JWT_TOKEN="eyJraWQiOiJHYjM4OWEtOWY3Ni1nZGpzLWE5MmotMDI0MmJrOTQzNTYiLCJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJvcGVuLW1ldGFkYXRhLm9yZyIsInN1YiI6ImluZ2VzdGlvbi1ib3QiLCJlbWFpbCI6ImluZ2VzdGlvbi1ib3RAb3Blbm1ldGFkYXRhLm9yZyIsImlzQm90Ijp0cnVlLCJ0b2tlblR5cGUiOiJCT1QiLCJpYXQiOjE3MTI0MTM1NzIsImV4cCI6bnVsbH0.lc__HkQtXDfimQtONbAMwyljK9Sjlw7z0G6bz8GoT2-t5dq1ptN9NFnodRgA-WAqNgc4-umMKQpFYErBIwjNY-dCvB6wE6GdpR7ceAoqKySQHNvx4DPIB6jAHK0dVwtSIArTA_boYjXxUnv2wpTVr8b5kfNmoLiMI3tPb7tqgXyUemQDnNMCXKepAkPTb10fpNDCbH8n5oTwieqB1Wl9PLNxJhRXct-GuWtaWibtxTtcp7mBNEkTRIef4YJmqZyqE2EJAcbKo2KJahEonKEcQD8DHf1GtCaRLNARnbrdo5t5rIFxipiP4-_iLBtKB1KIZy7fjvSPXhrIljzprOSBvQ"
+# JWTs have limited validity. We need to grab a newly created one
+
+JWT_TOKEN=$(grep -oP '(?<=jwtToken: \")[^"]+' /opt/airflow/dags/airflow_docker_operator.py)
 
 echo "Creating topics"
 kafka-topics --bootstrap-server broker:9092 --create --topic topic-1 --partitions 1

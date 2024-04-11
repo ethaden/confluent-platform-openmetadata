@@ -178,6 +178,21 @@ kafka-console-consumer --bootstrap-server localhost:9092 \
     --topic topic-1
 ```
 
+== Inserting data into MariaDB SQL
+
+Run mysql like this:
+```shell
+docker compose exec mariadb mariadb -u root -pmariadb demo
+```
+
+Insert some data:
+```SQL
+INSERT INTO Persons (LastName, FirstName, Address, City) VALUES ("Doe", "John", "Unknown", "Unknown");
+INSERT INTO Persons (LastName, FirstName, Address, City) VALUES ("Doe", "Jane", "Unknown", "Unknown");
+```
+
+== Helpful commands
+
 You can delete the topics like this:
 
 ```shell
