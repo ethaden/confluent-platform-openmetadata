@@ -4,7 +4,7 @@ This is an example how OpenMetaData can be integrated with Confluent Platform.
 
 This example code consists of a transactional producer, a simple Kafka Streams application which just forwards data to another topic, and a transactional consumer.
 
-DISCLAIMER: This project is for demonstration purposes only. Using the concept in production is highly discouraged. Use at your own risk.
+DISCLAIMER: This project is for demonstration purposes only. Using the demo unmodified in production is highly discouraged. Use at your own risk.
 
 == Preconditions
 
@@ -12,11 +12,6 @@ This project has been tested with Java version 17 and Gradle version TODO
 
 == Running OpenMetaData and Confluent Platform
 Change to folder `cluster`.
-
-Build the custom Kafka Connect Docker Image:
-```shell
-docker build . -t cp-server-connect-custom:1.0.0
-```
 
 Start the containers by running:
 ```shell
@@ -118,9 +113,9 @@ Use these values:
 Bootstrap server: broker:9092
 Schema Registry URL: http://schema-registry:8081
 
-Create an ingestion for the service. For this example, enable "Generate Sample Data" and run this ingestion pipeline every 5 minutes.
+An ingestion for the service for the Kafka cluster is created automatically at startup by this demo.
 
-You should see the two topics.
+You should see the imported topics and their schemas.
 
 == Building the Producers
 Initialize by running
@@ -183,13 +178,9 @@ kafka-console-consumer --bootstrap-server localhost:9092 \
     --topic topic-1
 ```
 
-You can delete the auto-created topic like this:
+You can delete the topics like this:
 
 ```shell
 kafka-topics --bootstrap-server localhost:9092 --delete --topic topic-1
+kafka-topics --bootstrap-server localhost:9092 --delete --topic topic-2
 ```
-
-== Results
-
-If mixing transactional and non-transactional messages in a single topic, consumers will still see all messages by default. With `isolation.level=read_committed` they will just see all commited messages from the transactions and additionally all non-transactional messages. The messages are filtered on the consumer side, but this happens inside of the Kafka client library and is not exposed to the customer application. Particularly, it is not possible on the application level to distinguish between commited transactional messages and non-transactional messages.
-
