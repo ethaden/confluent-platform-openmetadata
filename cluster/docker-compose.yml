@@ -505,13 +505,13 @@ services:
       args:
         CP_TAG: ${CP_TAG}
     ports:
-      - 28082:28082
+      - 8083:8083
     networks:
       - app_net
     depends_on:
       - broker
     environment:
-      CONNECT_REST_PORT: 28082
+      CONNECT_REST_PORT: 8083 # default
       CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
       CONNECT_GROUP_ID: default
       CONNECT_REPLICATION_FACTOR: 1
@@ -521,16 +521,18 @@ services:
       CONNECT_CONFIG_STORAGE_TOPIC: _connect-connect-config
       CONNECT_OFFSET_STORAGE_TOPIC: _connect-connect-offsets
       CONNECT_STATUS_STORAGE_TOPIC: _connect-connect-status
-      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_PLUGIN_PATH: /usr/share/confluent-hub-components
+      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
 
   mariadb:
     image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     hostname: mariadb
     container_name: mariadb
     restart: always
