@@ -501,6 +501,10 @@ services:
     entrypoint: /bin/bash
     command:
       - "/usr/bin/init_custom_ingestion.sh"
+    environment:
+      MARIADB_OPENMETADATA_USER: ${MARIADB_OPENMETADATA_USER}
+      MARIADB_OPENMETADATA_PASSWORD: ${MARIADB_OPENMETADATA_PASSWORD}
+      JWT_TOKEN: ${JWT_TOKEN}
 
   connect:
     image: cp-server-connect-custom
@@ -576,6 +580,8 @@ services:
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
       MARIADB_CONNECT_USER: ${MARIADB_CONNECT_USER}
       MARIADB_CONNECT_PASSWORD: ${MARIADB_CONNECT_PASSWORD}
+      MARIADB_OPENMETADATA_USER: ${MARIADB_OPENMETADATA_USER}
+      MARIADB_OPENMETADATA_PASSWORD: ${MARIADB_OPENMETADATA_PASSWORD}
 
   init_connect:
     image: confluentinc/cp-kafka:${CP_TAG}
