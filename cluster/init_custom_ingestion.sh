@@ -119,33 +119,35 @@ export SERVICE_ID=$(curl --request POST --header "Content-Type: application/json
 }" \
 http://openmetadata_server:8585/api/v1/services/databaseServices | grep -oP '(?<="id":")[^"]+')
 if [ -n ${SERVICE_ID} ]; then
-    echo "Created service Kafka with ID ${SERVICE_ID}"
-    echo "Creating ingestion pipeline for kafka..."
+    echo "Created service MariaDB with ID ${SERVICE_ID}"
+    echo "Creating ingestion pipeline for MariaDB..."
     export INGESTION_ID=$(curl --request POST --header "Content-Type: application/json" -H "Authorization: Bearer ${JWT_TOKEN}" --data \
         "{\"name\":\"mariadb_metadata_wUMTfesN\",
           \"displayName\":\"mariadb_metadata_wUMTfesN\",
           \"pipelineType\":\"metadata\",
           \"sourceConfig\":
-          {\"type\":\"DatabaseMetadata\",
-            \"includeTags\":true,
-            \"includeViews\":true,
-            \"includeTables\":true,
-            \"markDeletedTables\":true,
-            \"tableFilterPattern\":{
+          {\"config\":
+            {\"type\":\"DatabaseMetadata\",
+              \"includeTags\":true,
+              \"includeViews\":true,
+              \"includeTables\":true,
+              \"markDeletedTables\":true,
+              \"tableFilterPattern\":{
                 \"excludes\":[],
                 \"includes\":[]
-            },
-            \"useFqnForFiltering\":false,
-            \"schemaFilterPattern\":{
+              },
+              \"useFqnForFiltering\":false,
+              \"schemaFilterPattern\":{
                 \"excludes\":[],
                 \"includes\":[]
-            },
-            \"markAllDeletedTables\":false,
-            \"databaseFilterPattern\":{
+              },
+              \"markAllDeletedTables\":false,
+              \"databaseFilterPattern\":{
                 \"excludes\":[],
                 \"includes\":[]
-            },
-            \"viewParsingTimeoutLimit\":300
+              },
+              \"viewParsingTimeoutLimit\":300
+            }
           },
           \"airflowConfig\":
           {\"pausePipeline\":false,
@@ -162,14 +164,14 @@ if [ -n ${SERVICE_ID} ]; then
           },
           \"service\":
           {
-           \"id\":\"${SERVICE_ID}\",\"type\":
-           \"databaseService\",
+           \"id\":\"${SERVICE_ID}\",
+           \"type\":\"databaseService\",
            \"name\":\"mariadb\",
            \"fullyQualifiedName\":\"mariadb\",
            \"description\":\"\",
            \"deleted\":false,
            \"href\":\"http://localhost:8585/api/v1/services/databaseServices/${SERVICE_ID}\"
-          } 
+          }
         }" \
         http://openmetadata_server:8585/api/v1/services/ingestionPipelines | grep -oP '(?<=^{"id":")[^"]+')
         #
