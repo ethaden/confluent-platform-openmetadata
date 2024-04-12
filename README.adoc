@@ -15,20 +15,20 @@ Change to folder `cluster`.
 
 Start the containers by running:
 ```shell
-docker-compose up -d
+docker compose up -d
 ```
 
 Stopping the containers (but leave volumes intact):
 ```shell
-docker-compose down
+docker compose down
 ```
 
 Stopping the containers (and delete all volumes, CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
 ```shell
-docker-compose down -v
+docker compose down -v
 ```
 
-Cleaning up, if you haven't done already (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
+Cleaning up, if you haven't done that already (CAREFUL: THIS WILL DELETE ALL UNUSED VOLUMES):
 ```shell
 docker volumes prune
 ```

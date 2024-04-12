@@ -482,10 +482,12 @@ services:
     container_name: init_custom_ingestion
     depends_on:
       openmetadata-server:
-        condition: service_started
+        condition: service_healthy
       execute-migrate-all:
         condition: service_completed_successfully
       mariadb:
+        condition: service_started
+      ingestion:
         condition: service_started
     networks:
       - app_net

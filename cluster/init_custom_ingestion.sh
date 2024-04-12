@@ -87,7 +87,7 @@ if [ -n ${SERVICE_ID} ]; then
            \"messagingService\",
            \"name\":\"kafka\",
            \"fullyQualifiedName\":\"kafka\",
-           \"description\":\"\",
+           \"description\":\"Demo Kafka Message Service\",
            \"deleted\":false,
            \"href\":\"http://localhost:8585/api/v1/services/messagingServices/${SERVICE_ID}\"
           } 
