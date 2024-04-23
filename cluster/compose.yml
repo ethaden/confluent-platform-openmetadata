@@ -506,7 +506,6 @@ services:
       JWT_TOKEN: ${JWT_TOKEN}
 
   connect:
-    image: cp-server-connect-custom
     build:
       context: .
       args:
