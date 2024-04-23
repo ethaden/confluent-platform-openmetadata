@@ -18,6 +18,12 @@ Start the containers by running:
 docker compose up -d
 ```
 
+Note: If you have a large machine with many cores and lots of RAM, you can optionally run Confluent Control center
+```shell
+docker compose --profile c3 up -d
+```
+
+
 Stopping the containers (but leave volumes intact):
 ```shell
 docker compose down

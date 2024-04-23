@@ -457,6 +457,7 @@ services:
     image: confluentinc/cp-enterprise-control-center:${CP_TAG}
     hostname: control-center
     container_name: control-center
+    profiles: [c3]
     depends_on:
       - broker
       - schema-registry
