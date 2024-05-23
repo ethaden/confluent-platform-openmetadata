@@ -11,6 +11,9 @@ kafka-topics --bootstrap-server broker:9092 --create --topic topic-1 --partition
 kafka-topics --bootstrap-server broker:9092 --create --topic topic-2 --partitions 1
 kafka-topics --bootstrap-server broker:9092 --create --topic topic-3 --partitions 1
 
+# Wait a few seconds until everything has been set up
+#sleep 5
+
 echo "Setting compatibility modes"
 curl -X PUT -H "Content-Type: application/vnd.schemaregistry.v1+json" \
   --data '{"compatibility": "FORWARD_TRANSITIVE"}' \
